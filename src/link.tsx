@@ -1,6 +1,7 @@
+import type { LinkProps } from "next/link";
 import NextLink from "next/link";
-import { useTransitionRouter } from "./use-transition-router";
 import { useCallback } from "react";
+import { useTransitionRouter } from "./use-transition-router";
 
 // copied from https://github.com/vercel/next.js/blob/66f8ffaa7a834f6591a12517618dce1fd69784f6/packages/next/src/client/link.tsx#L180-L191
 function isModifiedEvent(event: React.MouseEvent): boolean {
@@ -36,7 +37,7 @@ function shouldPreserveDefault(
 // This is a wrapper around next/link that explicitly uses the router APIs
 // to navigate, and trigger a view transition.
 
-export function Link(props: React.ComponentProps<typeof NextLink>) {
+export function Link<T>(props: LinkProps<T>) {
   const router = useTransitionRouter();
 
   const { href, as, replace, scroll } = props;
