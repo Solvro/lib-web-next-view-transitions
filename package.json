@@ -1,6 +1,6 @@
 {
   "name": "@solvro/next-view-transitions",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "type": "module",
   "description": "View Transitions API for Next.js App Router",
   "main": "./dist/index.js",
@@ -11,8 +11,7 @@
   "exports": "./dist/index.js",
   "scripts": {
     "build": "bunchee",
-    "dev": "bunchee --watch",
-    "prepare": "npm run build"
+    "dev": "bunchee --watch"
   },
   "keywords": [
     "next",
