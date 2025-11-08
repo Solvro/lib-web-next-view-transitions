@@ -29,15 +29,15 @@ importers:
 
   example:
     dependencies:
+      '@solvro/next-view-transitions':
+        specifier: workspace:*
+        version: link:..
       geist:
         specifier: ^1.5.1
         version: 1.5.1(next@16.0.1(react-dom@19.2.0(react@19.2.0))(react@19.2.0))
       next:
         specifier: ^16.0.1
         version: 16.0.1(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
-      next-view-transitions:
-        specifier: workspace:*
-        version: link:..
       react:
         specifier: ^19.2.0
         version: 19.2.0
