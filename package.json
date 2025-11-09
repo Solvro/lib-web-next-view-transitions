@@ -1,6 +1,6 @@
 {
   "name": "@solvro/next-view-transitions",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "type": "module",
   "description": "View Transitions API for Next.js App Router",
   "main": "./dist/index.js",

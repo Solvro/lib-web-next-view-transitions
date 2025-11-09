@@ -51,7 +51,7 @@ export default function Page() {
             e.preventDefault();
             router.push("/demo", {
               // optional callback before starting the transition
-              beforeTransitionStarted: async () => {
+              onSnapshotTaken: async () => {
                 // simulate a delay, e.g., for data fetching
                 await new Promise((resolve) => setTimeout(resolve, 1000));
                 // simulate a state update to show that the snapshot is already taken
