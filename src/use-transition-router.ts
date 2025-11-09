@@ -11,18 +11,24 @@ export type TransitionOptions = {
 };
 
 type NavigateOptionsWithTransition = NavigateOptions & TransitionOptions;
+type TriggerTransitionFunction = (
+  callback: () => void,
+  transitionOptions?: TransitionOptions,
+) => void;
 
 export type TransitionRouter = AppRouterInstance & {
   push: (href: string, options?: NavigateOptionsWithTransition) => void;
   replace: (href: string, options?: NavigateOptionsWithTransition) => void;
+  /** Allows manual triggering of a view transition. @since v0.4.0 */
+  triggerTransition: TriggerTransitionFunction;
 };
 
 export function useTransitionRouter() {
   const router = useNextRouter();
   const finishViewTransition = useSetFinishViewTransition();
 
-  const triggerTransition = useCallback(
-    (cb: () => void, { onTransitionReady }: TransitionOptions = {}) => {
+  const triggerTransition = useCallback<TriggerTransitionFunction>(
+    (cb, { onTransitionReady } = {}) => {
       if ("startViewTransition" in document) {
         // @ts-ignore
         const transition = document.startViewTransition(
@@ -74,7 +80,8 @@ export function useTransitionRouter() {
       ...router,
       push,
       replace,
+      triggerTransition,
     }),
-    [push, replace, router],
+    [push, replace, triggerTransition, router],
   );
 }
