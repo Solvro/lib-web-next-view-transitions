@@ -1,9 +1,11 @@
 "use client";
 
 import { Link, useTransitionRouter } from "@solvro/next-view-transitions";
+import { useState } from "react";
 
 export default function Page() {
   const router = useTransitionRouter();
+  const [linkClicked, setLinkClicked] = useState(false);
 
   return (
     <div>
@@ -41,6 +43,27 @@ export default function Page() {
           href="/demo"
         >
           Go to /demo with custom transition →
+        </a>
+      </p>
+      <p>
+        <a
+          onClick={(e) => {
+            e.preventDefault();
+            router.push("/demo", {
+              // optional callback before starting the transition
+              beforeTransitionStarted: async () => {
+                // simulate a delay, e.g., for data fetching
+                await new Promise((resolve) => setTimeout(resolve, 1000));
+                // simulate a state update to show that the snapshot is already taken
+                setLinkClicked(true);
+              },
+            });
+          }}
+          href="/demo"
+        >
+          {linkClicked
+            ? "This will never be visible!"
+            : "Go to /demo after a delay →"}
         </a>
       </p>
       <h2 id="disclaimer">Disclaimer</h2>

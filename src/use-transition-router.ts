@@ -7,6 +7,11 @@ import {
 } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
 export type TransitionOptions = {
+  /**
+   * Callback invoked before the transition starts, but after the "before" DOM snapshot has been taken.
+   * Can be asynchronous. Aborts the view transition if it throws or rejects. @since v0.4.1
+   */
+  onSnapshotTaken?: () => void | Promise<void>;
   onTransitionReady?: () => void;
 };
 
@@ -28,18 +33,23 @@ export function useTransitionRouter() {
   const finishViewTransition = useSetFinishViewTransition();
 
   const triggerTransition = useCallback<TriggerTransitionFunction>(
-    (cb, { onTransitionReady } = {}) => {
+    (
+      cb,
+      { onSnapshotTaken: beforeTransitionStarted, onTransitionReady } = {},
+    ) => {
       if ("startViewTransition" in document) {
         // @ts-ignore
-        const transition = document.startViewTransition(
-          () =>
-            new Promise<void>((resolve) => {
-              startTransition(() => {
-                cb();
-                finishViewTransition(() => resolve);
-              });
-            }),
-        );
+        const transition = document.startViewTransition(async () => {
+          if (beforeTransitionStarted != null) {
+            await beforeTransitionStarted();
+          }
+          return new Promise<void>((resolve) => {
+            startTransition(() => {
+              cb();
+              finishViewTransition(() => resolve);
+            });
+          });
+        });
 
         if (onTransitionReady) {
           transition.ready.then(onTransitionReady);
@@ -54,9 +64,14 @@ export function useTransitionRouter() {
   const push = useCallback(
     (
       href: string,
-      { onTransitionReady, ...options }: NavigateOptionsWithTransition = {},
+      {
+        onSnapshotTaken,
+        onTransitionReady,
+        ...options
+      }: NavigateOptionsWithTransition = {},
     ) => {
       triggerTransition(() => router.push(href, options), {
+        onSnapshotTaken,
         onTransitionReady,
       });
     },
@@ -66,9 +81,14 @@ export function useTransitionRouter() {
   const replace = useCallback(
     (
       href: string,
-      { onTransitionReady, ...options }: NavigateOptionsWithTransition = {},
+      {
+        onSnapshotTaken,
+        onTransitionReady,
+        ...options
+      }: NavigateOptionsWithTransition = {},
     ) => {
       triggerTransition(() => router.replace(href, options), {
+        onSnapshotTaken,
         onTransitionReady,
       });
     },
