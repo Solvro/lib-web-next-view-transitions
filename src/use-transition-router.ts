@@ -9,7 +9,9 @@ import {
 export type TransitionOptions = {
   /**
    * Callback invoked before the transition starts, but after the "before" DOM snapshot has been taken.
-   * Can be asynchronous. Aborts the view transition if it throws or rejects. @since v0.4.1
+   * Can be asynchronous. Aborts the view transition if it throws or rejects.
+   * Called before navigation if the browser doesn't support view transtitions.
+   * @since v0.4.1
    */
   onSnapshotTaken?: () => void | Promise<void>;
   onTransitionReady?: () => void;
@@ -33,15 +35,12 @@ export function useTransitionRouter() {
   const finishViewTransition = useSetFinishViewTransition();
 
   const triggerTransition = useCallback<TriggerTransitionFunction>(
-    (
-      cb,
-      { onSnapshotTaken: beforeTransitionStarted, onTransitionReady } = {},
-    ) => {
+    (cb, { onSnapshotTaken, onTransitionReady } = {}) => {
       if ("startViewTransition" in document) {
         // @ts-ignore
         const transition = document.startViewTransition(async () => {
-          if (beforeTransitionStarted != null) {
-            await beforeTransitionStarted();
+          if (onSnapshotTaken != null) {
+            await onSnapshotTaken();
           }
           return new Promise<void>((resolve) => {
             startTransition(() => {
@@ -55,6 +54,7 @@ export function useTransitionRouter() {
           transition.ready.then(onTransitionReady);
         }
       } else {
+        onSnapshotTaken?.();
         return cb();
       }
     },
