@@ -9,40 +9,34 @@ import {
 export type TransitionOptions = {
   /**
    * Callback invoked before the transition starts, but after the "before" DOM snapshot has been taken.
-   * Can be asynchronous. Aborts the view transition if it throws or rejects. @since v0.4.1
+   * Can be asynchronous. Aborts the view transition if it throws or rejects.
+   * Called before navigation if the browser doesn't support view transitions.
+   * @since v0.4.1
    */
   onSnapshotTaken?: () => void | Promise<void>;
   onTransitionReady?: () => void;
 };
 
 type NavigateOptionsWithTransition = NavigateOptions & TransitionOptions;
-type TriggerTransitionFunction = (
-  callback: () => void,
-  transitionOptions?: TransitionOptions,
-) => void;
 
 export type TransitionRouter = AppRouterInstance & {
   push: (href: string, options?: NavigateOptionsWithTransition) => void;
   replace: (href: string, options?: NavigateOptionsWithTransition) => void;
-  /** Allows manual triggering of a view transition. @since v0.4.0 */
-  triggerTransition: TriggerTransitionFunction;
 };
 
 export function useTransitionRouter() {
   const router = useNextRouter();
   const finishViewTransition = useSetFinishViewTransition();
 
-  const triggerTransition = useCallback<TriggerTransitionFunction>(
-    (
-      cb,
-      { onSnapshotTaken: beforeTransitionStarted, onTransitionReady } = {},
+  const triggerTransition = useCallback(
+    async (
+      cb: () => void,
+      { onSnapshotTaken, onTransitionReady }: TransitionOptions = {},
     ) => {
       if ("startViewTransition" in document) {
         // @ts-ignore
         const transition = document.startViewTransition(async () => {
-          if (beforeTransitionStarted != null) {
-            await beforeTransitionStarted();
-          }
+          await onSnapshotTaken?.();
           return new Promise<void>((resolve) => {
             startTransition(() => {
               cb();
@@ -55,6 +49,7 @@ export function useTransitionRouter() {
           transition.ready.then(onTransitionReady);
         }
       } else {
+        await onSnapshotTaken?.();
         return cb();
       }
     },
@@ -100,8 +95,7 @@ export function useTransitionRouter() {
       ...router,
       push,
       replace,
-      triggerTransition,
     }),
-    [push, replace, triggerTransition, router],
+    [push, replace, router],
   );
 }
